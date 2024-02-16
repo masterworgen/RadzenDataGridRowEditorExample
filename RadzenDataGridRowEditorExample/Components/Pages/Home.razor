@@ -1,0 +1,95 @@
+﻿@page "/"
+@using RadzenDataGridRowEditorExample.Models
+@using Radzen
+
+<PageTitle>Home</PageTitle>
+
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+
+<RadzenDataGrid TItem="User" 
+                Data="@Users"
+                CellDoubleClick="OnCellDoubleClick"
+                CellClick="OnCellClick" 
+                AllowAlternatingRows="false"
+                EditMode="DataGridEditMode.Single" 
+                SelectionMode="DataGridSelectionMode.Single">
+    <Columns>
+        <RadzenDataGridColumn TItem="User" Property="@nameof(User.Name)" Title="Name">
+            <Template Context="user">
+                @{
+                    if (SelectedCell?.Item1 == user && SelectedCell?.Item2 == nameof(User.Name))
+                    {
+                        <RadzenTextBox @bind-Value="@user.Name"/>
+                    }
+                    else
+                    {
+                        <span title="@user.Name">@user.Name</span>
+                    }
+                }
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="User" Property="@nameof(User.Surname)" Title="Surname">
+            <Template Context="user">
+                @{
+                    if (SelectedCell?.Item1 == user && SelectedCell?.Item2 == nameof(User.Surname))
+                    {
+                        <RadzenTextBox @bind-Value="@user.Surname" />
+                    }
+                    else
+                    {
+                        <span title="@user.Name">@user.Surname</span>
+                    }
+                }
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="User" Property="@nameof(User.Age)" Title="Age">
+            <Template Context="user">
+                @{
+                    if (SelectedCell?.Item1 == user && SelectedCell?.Item2 == nameof(User.Age))
+                    {
+                        <RadzenNumeric @bind-Value="@user.Age" ShowUpDown=false/>
+                    }
+                    else
+                    {
+                        <span title="@user.Name">@user.Age</span>
+                    }
+                }
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code
+{
+    public readonly string[] PropertyToEdit = [nameof(User.Name), nameof(User.Surname), nameof(User.Age)];
+
+    public List<User> Users =
+    [
+        new User("Crystel", "Gasner", 25),
+        new User("Christobal", "Fissel", 25),
+        new User("Lee", "Condron", 25)
+    ];
+
+    public (User, string)? SelectedCell;
+
+    public Task OnCellDoubleClick(DataGridCellMouseEventArgs<User> arg)
+    {
+        if (PropertyToEdit.Any(x => x == arg.Column.Property) || !int.TryParse(arg.Column.Property, out _))
+            SelectedCell = (arg.Data, arg.Column.Property);
+
+        return Task.CompletedTask;
+    }
+
+    public Task OnCellClick(DataGridCellMouseEventArgs<User> arg)
+    {
+        if (SelectedCell is not null && (SelectedCell?.Item1 != arg.Data || SelectedCell?.Item2 != arg.Column.Property))
+        {
+            //Some kind of processing
+            SelectedCell = null;
+        }
+
+        return Task.CompletedTask;
+    }
+}
